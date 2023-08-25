@@ -8,8 +8,16 @@ struct my_allocator {
     static constexpr std::size_t PoolSize = 1000;
 
     my_allocator () noexcept { init_pool= static_cast<T*>(::operator new(PoolSize * sizeof(T)));}
-    template <class U> my_allocator  (const my_allocator<U>&) = delete ;
-    template <class U> my_allocator<U>& operator=(const my_allocator<U>&) = delete ;
+    my_allocator  (const my_allocator<T>&) = delete ;
+    my_allocator<T> &operator=(const my_allocator<T>&) = delete ;
+    my_allocator(my_allocator<T> &&other) : init_pool{other.init_pool},current_size{other.current_size} { other.ptr = nullptr;other.current_size = 0; }
+    my_allocator<T> &operator=(my_allocator<T> &&other) {
+        init_pool = other.init_pool;
+        current_size = other.current_size;
+        other.ptr = nullptr;
+        other.current_size = 0;
+        return *this;
+    };
 
     T* allocate (std::size_t n)
     {   
